@@ -49,6 +49,9 @@ echo "安装 luci-app-openclash ..."
 rm -rf package/luci-app-openclash
 git clone --depth=1 https://github.com/vernesong/OpenClash.git package/luci-app-openclash
 
+# 3. 赋予绝对可执行权限
+chmod +x files/etc/openclash/core/clash_meta
+
 # =====================================================================
 # 4. Golang 升级（解决依赖问题）
 # =====================================================================
