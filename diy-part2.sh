@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # =====================================================================
-# diy-part2.sh - 适用于 qwer258q/immortalwrt-mt798x (openwrt-21.02)
+# diy-part2.sh - 适用于 qwer258q/immortalwrt-mt798x-6.6 (openwrt-24.10)
 # =====================================================================
 
 echo "========== 开始执行 diy-part2.sh =========="
@@ -37,7 +37,7 @@ git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 # v2ray-geodata（推荐使用 sbwml 版）
 echo "安装 v2ray-geodata ..."
 rm -rf feeds/packages/net/v2ray-geodata package/feeds/v2ray-geodata
-git clone https://github.com/sbwml/v2ray-geodata.git package/feeds/v2ray-geodata
+git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
 # netspeedtest
 echo "安装 luci-app-netspeedtest ..."
@@ -48,28 +48,6 @@ git clone --depth=1 https://github.com/muink/luci-app-netspeedtest.git package/n
 echo "安装 luci-app-openclash ..."
 rm -rf package/luci-app-openclash
 git clone --depth=1 https://github.com/vernesong/OpenClash.git package/luci-app-openclash
-
-# =====================================================================
-# 3. 【重点修复】Clash Meta 内核打包
-# =====================================================================
-echo "正在集成 Clash Meta 内核..."
-
-META_CORE_DIR="package/luci-app-openclash/luasrc/view/openclash/root/etc/openclash/core"
-mkdir -p "$META_CORE_DIR"
-
-if [ -f "clash_meta" ]; then
-    cp -f clash_meta "$META_CORE_DIR/clash_meta"
-    chmod +x "$META_CORE_DIR/clash_meta"
-    echo "✅ Clash Meta 内核已成功复制并设置执行权限！"
-else
-    echo "❌ 未找到 clash_meta 文件！请确保它在仓库根目录"
-fi
-
-# 额外保险：复制到其他可能的 core 目录
-if [ -d "package/luci-app-openclash/root/etc/openclash/core" ]; then
-    cp -f clash_meta package/luci-app-openclash/root/etc/openclash/core/clash_meta 2>/dev/null || true
-    chmod +x package/luci-app-openclash/root/etc/openclash/core/clash_meta 2>/dev/null || true
-fi
 
 # =====================================================================
 # 4. Golang 升级（解决依赖问题）
