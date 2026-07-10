@@ -98,7 +98,6 @@ fi
 # 6. 刷新并重新建立 feeds 索引
 # =====================================================================
 echo "正在重新刷新本地 feeds 索引树..."
-./scripts/feeds update -i
-./scripts/feeds install -a
+./scripts/feeds update -a && ./scripts/feeds install -a
 
 echo "========== diy-part2.sh 执行完成 =========="
