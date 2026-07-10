@@ -2,7 +2,7 @@
 
 # =====================================================================
 # diy-part2.sh - 适用于 qwer258q/immortalwrt-mt798x-6.6 (openwrt-24.10)
-# 本地编译优化版（集成 mosdns 官方推荐的 v2ray-geodata 依赖）
+# 本地编译【强力清理·强制最新版】优化脚本
 # =====================================================================
 
 echo "========== 开始执行 diy-part2.sh =========="
@@ -37,38 +37,54 @@ sed -i 's/192.168.1.1/192.168.31.1/g' package/base-files/files/bin/config_genera
 echo "✅ IP 修改完成"
 
 # =====================================================================
-# 3. 第三方插件处理 (遵循官方教程 & 清理本地缓存)
+# 3. 强力清理源码自带旧插件 & 清理本地缓存
+# =====================================================================
+echo "正在强力斩草除根：清理源码自带的旧版 mosdns、geodata 以及历史残留..."
+
+# 1. 彻底删除 feeds 目录下的旧源码
+rm -rf feeds/packages/net/mosdns
+rm -rf feeds/packages/net/v2ray-geodata
+
+# 2. 彻底删除 package/feeds/ 软链接映射
+rm -rf package/feeds/packages/mosdns
+rm -rf package/feeds/packages/v2ray-geodata
+
+# 3. 预防性删除 package 核心目录下可能同名的历史旧文件夹
+rm -rf package/mosdns
+rm -rf package/v2ray-geodata
+rm -rf package/luci-app-mosdns
+rm -rf package/luci-app-openclash
+rm -rf package/netspeedtest
+
+# 4. 清理编译临时索引缓存（极其关键！不删它，menuconfig里还是旧索引）
+rm -rf tmp
+
+echo "✅ 旧版源码与编译缓存清理完毕！"
+
+# =====================================================================
+# 4. 拉取全套最新版第三方插件
 # =====================================================================
 
-# 🛑 核心：彻底清理本地旧的 feeds 缓存和软链接（防止 package redefined 报错）
-echo "正在清理旧的 mosdns 与 geodata 冲突残留..."
-rm -rf feeds/packages/net/mosdns feeds/packages/net/v2ray-geodata
-rm -rf package/feeds/packages/mosdns package/feeds/packages/v2ray-geodata
-
-# 📦 安装 mosdns (sbwml版)
-echo "安装 luci-app-mosdns ..."
-rm -rf package/mosdns
+# 📦 安装 mosdns (sbwml最新版)
+echo "正在拉取最新 luci-app-mosdns v5 ..."
 git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 
-# 📦 安装 v2ray-geodata (sbwml版 - 官方教程要求)
-echo "安装 v2ray-geodata ..."
-rm -rf package/v2ray-geodata
+# 📦 安装 v2ray-geodata (sbwml最新版)
+echo "正在拉取最新 v2ray-geodata ..."
 git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
 # 📦 安装 netspeedtest
-echo "安装 luci-app-netspeedtest ..."
-rm -rf package/netspeedtest
+echo "正在拉取最新 luci-app-netspeedtest ..."
 git clone --depth=1 https://github.com/muink/luci-app-netspeedtest.git package/netspeedtest
 
-# 📦 安装 OpenClash (精准提取子目录，防止本地找不到 Makefile 导致不显示插件)
-echo "安装 luci-app-openclash ..."
-rm -rf package/luci-app-openclash
+# 📦 安装 OpenClash (精准提取最新版子目录)
+echo "正在拉取最新 luci-app-openclash ..."
 git clone --depth=1 https://github.com/vernesong/OpenClash.git /tmp/openclash
 mv /tmp/openclash/luci-app-openclash package/luci-app-openclash
 rm -rf /tmp/openclash
 
 # =====================================================================
-# 4. 赋予预置内核可执行权限
+# 5. 赋予预置内核可执行权限
 # =====================================================================
 if [ -f "files/etc/openclash/core/clash_meta" ]; then
     echo "正在为预置的 clash_meta 内核赋予执行权限 ..."
@@ -79,7 +95,7 @@ else
 fi
 
 # =====================================================================
-# 5. 本地编译核心：重新安装和刷新 feeds 索引
+# 6. 刷新并重新建立 feeds 索引
 # =====================================================================
 echo "正在重新刷新本地 feeds 索引树..."
 ./scripts/feeds update -i
